@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const registerSchema = z.object({
+const loginSchema = z.object({
   email: z
     .string()
     .trim()
@@ -33,16 +33,16 @@ const registerSchema = z.object({
     .min(8, { message: "A senha deve conter mais de 8 caracteres" }),
 });
 
-const SignUpForm = () => {
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+const SignInForm = () => {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof registerSchema>) => {
+  const onSubmit = (data: z.infer<typeof loginSchema>) => {
     console.log(data);
   };
 
@@ -93,4 +93,4 @@ const SignUpForm = () => {
   );
 };
 
-export default SignUpForm;
+export default SignInForm;
