@@ -10,7 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const userTable = pgTable("users", {
+export const usersTable = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -26,11 +26,11 @@ export const userTable = pgTable("users", {
     .notNull(),
 });
 
-export const userTableRelations = relations(userTable, ({ many }) => ({
+export const usersTableRelations = relations(usersTable, ({ many }) => ({
   userToClinics: many(userToClinicTable),
 }));
 
-export const sessionTable = pgTable("sessions", {
+export const sessionsTable = pgTable("sessions", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
@@ -40,16 +40,16 @@ export const sessionTable = pgTable("sessions", {
   userAgent: text("user_agent"),
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
 });
 
-export const accountTable = pgTable("accounts", {
+export const accountsTable = pgTable("accounts", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -61,7 +61,7 @@ export const accountTable = pgTable("accounts", {
   updatedAt: timestamp("updated_at").notNull(),
 });
 
-export const verificationTable = pgTable("verifications", {
+export const verificationsTable = pgTable("verifications", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
@@ -86,7 +86,7 @@ export const clinicTable = pgTable("clinics", {
 export const userToClinicTable = pgTable("user_to_clinics", {
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id),
+    .references(() => usersTable.id),
   clinicId: uuid("clinic_id")
     .notNull()
     .references(() => clinicTable.id),
@@ -99,9 +99,9 @@ export const userToClinicTable = pgTable("user_to_clinics", {
 export const userToClinicTableRelations = relations(
   userToClinicTable,
   ({ one }) => ({
-    user: one(userTable, {
+    user: one(usersTable, {
       fields: [userToClinicTable.userId],
-      references: [userTable.id],
+      references: [usersTable.id],
     }),
     clinic: one(clinicTable, {
       fields: [userToClinicTable.clinicId],
