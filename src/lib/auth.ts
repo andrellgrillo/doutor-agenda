@@ -1,10 +1,11 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { customSession } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import * as schema from "@/db/schema";
 
 import { db } from "../db";
-
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -22,6 +23,30 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+
+  plugins: [
+    customSession(async ({ user, session }) => {
+      const clinics = await db.query.userToClinicTable.findMany({
+        where: eq(schema.userToClinicTable.userId, user.id),
+        with: {
+          clinic: true,
+        },
+      });
+      // TODO: Ao adaptar para que o usuário possa ter mais de uma clínica,deve-se mudar o código
+      const clinic = clinics[0];
+      return {
+        user: {
+          ...user,
+          clinic: {
+            clinicId: clinic.clinicId,
+            clinicName: clinic.clinic.name,
+          },
+        },
+        session,
+      };
+    }),
+  ],
+
   user: {
     modelName: "usersTable",
   },
