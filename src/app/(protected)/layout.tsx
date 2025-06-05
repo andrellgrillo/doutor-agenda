@@ -10,7 +10,7 @@ export default function ProtectedLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="mx-4">
+      <main className="w-full">
         <SidebarTrigger />
         {children}
       </main>
