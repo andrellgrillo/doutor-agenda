@@ -9,7 +9,7 @@ import { db } from "../db";
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    usePlural: true,
+    usePlural: false,
     schema: {
       usersTable: schema.usersTable,
       sessionsTable: schema.sessionsTable,
@@ -33,14 +33,14 @@ export const auth = betterAuth({
         },
       });
       // TODO: Ao adaptar para que o usuário possa ter mais de uma clínica,deve-se mudar o código
-      const clinic = clinics[0];
+      const clinic = clinics?.[0];
       return {
         user: {
           ...user,
-          clinic: {
-            clinicId: clinic.clinicId,
-            clinicName: clinic.clinic.name,
-          },
+          clinic: clinic?.clinicId? {
+            clinicId: clinic?.clinicId,
+            clinicName: clinic?.clinic?.name,
+          } : undefined,
         },
         session,
       };
@@ -48,7 +48,7 @@ export const auth = betterAuth({
   ],
 
   user: {
-    modelName: "usersTable",
+  modelName: "usersTable",
   },
   session: {
     modelName: "sessionsTable",

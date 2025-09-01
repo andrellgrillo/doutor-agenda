@@ -1,9 +1,6 @@
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { db } from "@/db";
-import { userToClinicTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
 import { SignOut } from "./components/signOut";
@@ -17,12 +14,7 @@ export default async function Dashboard() {
     redirect("/authentication");
   }
 
-  // Preciso pegar o nome da clínica do usuário
-  const clinic = await db.query.userToClinicTable.findFirst({
-    where: eq(userToClinicTable.userId, session.user.id),
-  });
-
-  if (!clinic) {
+  if (!session.user.clinic) {
     redirect("/clinic-form");
   }
 
