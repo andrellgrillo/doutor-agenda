@@ -30,6 +30,10 @@ import {
 } from "@/components/ui/select";
 import { medicalSpecialties } from "../constants";
 import { NumericFormat } from "react-number-format";
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z
   .object({
@@ -61,7 +65,11 @@ const formSchema = z
     },
   );
 
-const UpsertDoctorForm = () => {
+interface UpsertDoctorFormProps {
+  onSuccess?: () => void;
+}
+
+const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -75,8 +83,24 @@ const UpsertDoctorForm = () => {
     },
   });
 
+  const upsertDoctoraction = useAction(upsertDoctor, {
+    onSuccess: () => {
+      toast.success("Médico adicionado com sucesso");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar médico");
+    },
+  });
+
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log(data);
+    upsertDoctoraction.execute({
+      ...data,
+      appointmentPriceInCents: data.appointmentPrice * 100,
+      availableFromWeekDay: parseInt(data.availableFromWeekDay),
+      availableToWeekDay: parseInt(data.availableToWeekDay),
+    });
   };
 
   return (
@@ -336,7 +360,16 @@ const UpsertDoctorForm = () => {
             )}
           />
           <DialogFooter>
-            <Button type="submit">Adicionar</Button>
+            <Button type="submit" disabled={upsertDoctoraction.isPending}>
+              {upsertDoctoraction.isPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Adicionando...
+                </span>
+              ) : (
+                "Adicionar"
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </Form>
